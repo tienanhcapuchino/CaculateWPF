@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Caculate"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:gif="http://wpfanimatedgif.codeplex.com"
         mc:Ignorable="d"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
@@ -230,5 +231,10 @@
             VerticalAlignment="Top" SelectionChanged="cbFilterMembers_SelectionChanged"/>
         <Label Content="Lọc theo ngày" HorizontalAlignment="Left" Margin="10,0,0,0" Grid.Row="2" VerticalAlignment="Center"/>
         <DatePicker x:Name="dtpFilterDate" HorizontalAlignment="Left" Margin="73,164,0,0" Grid.Row="2" VerticalAlignment="Top" RenderTransformOrigin="0.65,0.141" CalendarClosed="dtpFilterDate_CalendarClosed"/>
+        <Image x:Name="loadingSpinnerGift"
+               HorizontalAlignment="Left"
+               VerticalAlignment="Top"
+               Visibility="Collapsed"
+               Width="167" Height="129" Margin="396,168,0,0" Grid.Row="1" Grid.ColumnSpan="2" Grid.RowSpan="2" />
     </Grid>
 </Window>

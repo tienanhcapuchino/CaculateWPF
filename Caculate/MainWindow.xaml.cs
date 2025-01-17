@@ -2,8 +2,11 @@
 using Caculate.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Imaging;
+using WpfAnimatedGif;
 
 namespace Caculate
 {
@@ -26,8 +29,19 @@ namespace Caculate
         private ObservableCollection<DataGridReport> dataGridReports = new ObservableCollection<DataGridReport>();
         private ObservableCollection<DataGridOutstanding> dataGridOutstandings = new ObservableCollection<DataGridOutstanding>();
 
+        private Uri? GetLoadingSpinnerUri()
+        {
+            string gifFilePath = Path.Combine(Directory.GetCurrentDirectory(), "Images", "loading_spinner.gif");
+            var gifUri = new Uri(gifFilePath);
+            return gifUri;
+        }
+
         private void LoadData()
         {
+            var giftUri = GetLoadingSpinnerUri();
+            ImageBehavior.SetAnimatedSource(loadingSpinnerGift, new BitmapImage(giftUri));
+            loadingSpinnerGift.Visibility = Visibility.Visible;
+            //Task.Delay(5000);
             var (startOfWeek, endOfWeek) = GetCurrentWeek();
             tbWeek.Text = $"TUẦN: {startOfWeek:dd/MM/yyyy} - {endOfWeek:dd/MM/yyyy}";
             List<Member> members = new List<Member>();
@@ -46,6 +60,7 @@ namespace Caculate
             });
 
             LoadReportByWeek();
+            //loadingSpinnerGift.Visibility = Visibility.Collapsed;
         }
 
 
@@ -400,8 +415,8 @@ namespace Caculate
         private void dtpFilterDate_CalendarClosed(object sender, RoutedEventArgs e)
         {
             var selectedDate = dtpFilterDate.SelectedDate;
-            _filterModel = new FilterModel() 
-            { 
+            _filterModel = new FilterModel()
+            {
                 CreatedDate = selectedDate != null ? selectedDate.Value : null,
                 MemberName = cbFilterMembers.SelectedItem.ToString()
             };
