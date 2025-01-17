@@ -128,8 +128,15 @@ namespace Caculate
                 MessageBox.Show("Please add order detail first");
                 return;
             }
-            var isExistPayer = dataGridOrderModels.Any(x => x.IsPayer);
-            if (!isExistPayer)
+            var countIsPayer = dataGridOrderModels.Count(x => x.IsPayer);
+
+            if (countIsPayer > 1)
+            {
+                MessageBox.Show("You only can select one payer!");
+                return;
+            }
+
+            if (countIsPayer == 0)
             {
                 MessageBox.Show("Please select payer");
                 return;
