@@ -68,6 +68,8 @@ namespace Caculate
         {
             try
             {
+                dataGridReports.Clear();
+                dataGridOutstandings.Clear();
                 var (startOfWeek, endOfWeek) = GetCurrentWeek();
                 using (var context = new CaculateDbContext())
                 {
@@ -88,9 +90,7 @@ namespace Caculate
                     {
                         //load combobox filter members
                         MembersFilter.AddRange(allMembersJoin.Select(x => x.Name).ToList());
-
                         cbFilterMembers.ItemsSource = MembersFilter;
-                        cbFilterMembers.SelectedIndex = 0;
                     }
 
                     foreach (var member in allMembersJoin)
@@ -407,7 +407,6 @@ namespace Caculate
                     CreatedDate = selectedDate != null ? selectedDate.Value : null,
                     MemberName = currentMemberFilter
                 };
-                dataGridReports.Clear();
                 LoadReportByWeek(filterModel);
             }
         }
@@ -420,7 +419,6 @@ namespace Caculate
                 CreatedDate = selectedDate != null ? selectedDate.Value : null,
                 MemberName = cbFilterMembers.SelectedItem.ToString()
             };
-            dataGridReports.Clear();
             LoadReportByWeek(_filterModel);
         }
     }

@@ -1,7 +1,7 @@
 ﻿using Caculate.Configurations;
 using Caculate.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using System.IO;
 
 namespace Caculate.DataContext
 {
@@ -24,12 +24,9 @@ namespace Caculate.DataContext
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
-            var conStr = config.GetConnectionString("CaculateConnectionStr");
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseNpgsql(conStr);
-            }
+            string databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CaculateApp", "caculateapp.db");
+            Directory.CreateDirectory(Path.GetDirectoryName(databasePath));
+            optionsBuilder.UseSqlite($"Data Source={databasePath}");
         }
 
         #region entities

@@ -27,7 +27,11 @@ namespace Caculate
                 .Build();
 
             services.AddDbContext<CaculateDbContext>(options =>
-                options.UseNpgsql(configuration.GetConnectionString("CaculateConnectionStr")));
+            {
+                string databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CaculateApp", "caculateapp.db");
+                Directory.CreateDirectory(Path.GetDirectoryName(databasePath));
+                options.UseSqlite($"Data Source={databasePath}");
+            });
         }
         protected override void OnStartup(StartupEventArgs e)
         {
