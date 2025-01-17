@@ -327,5 +327,28 @@ namespace Caculate
             }
         }
 
+        private void btUpdateOrderDateAll_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var selectedOrderDate = dtpOrderDateCustom.SelectedDate;
+                if (!selectedOrderDate.HasValue)
+                {
+                    MessageBox.Show("Please select date first");
+                    return;
+                }
+
+                foreach (var item in dataGridOrderModels)
+                {
+                    item.CreatedDate = selectedOrderDate.Value;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error when update date order all, {ex.Message}");
+                return;
+            }
+        }
     }
 }

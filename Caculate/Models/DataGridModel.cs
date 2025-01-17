@@ -1,12 +1,33 @@
-﻿namespace Caculate
+﻿using System.ComponentModel;
+
+namespace Caculate
 {
-    public class DataGridOrderModel
+    public class DataGridOrderModel : INotifyPropertyChanged
     {
+        private DateTime createdDate = DateTime.Now;
         public Guid MemberId { get; set; }
         public string Name { get; set; }
         public double Money { get; set; } = 0;
         public bool IsPayer { get; set; } = false;
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public DateTime CreatedDate
+        {
+            get => createdDate;
+            set
+            {
+                if (createdDate != value)
+                {
+                    createdDate = value;
+                    OnPropertyChanged(nameof(CreatedDate));
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 
     public class DataGridReport

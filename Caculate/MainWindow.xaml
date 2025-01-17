@@ -85,7 +85,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Action" Width="200">
+                <DataGridTemplateColumn Header="Hành động" Width="200">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
@@ -205,5 +205,20 @@
         <materialDesign:Card FontWeight="Bold" FontSize="18" Content="Thông tin đơn hàng từng thành viên" HorizontalAlignment="Left" Margin="335,0,0,0" VerticalAlignment="Center" Height="25" Width="305" Grid.ColumnSpan="2"/>
         <materialDesign:Card FontWeight="Bold" FontSize="18" Content="Lịch sử theo tuần" HorizontalAlignment="Left" Margin="40,15,0,0" VerticalAlignment="Top" Height="28" Width="153" Grid.Row="2"/>
         <materialDesign:Card FontWeight="Bold" FontSize="18" Content="Thông tin dư nợ trong tuần" HorizontalAlignment="Center" Margin="0,123,0,0" VerticalAlignment="Top" Height="25" Width="219" Grid.Column="2" Grid.Row="1"/>
+        <DatePicker Grid.Column="1" x:Name="dtpOrderDateCustom" HorizontalAlignment="Left" Margin="224,49,0,0" Grid.Row="1" VerticalAlignment="Top" RenderTransformOrigin="-5.414,1.562" Height="32" Width="120" Grid.ColumnSpan="2"/>
+        <Label Grid.Column="1" FontWeight="Bold" Content="Chọn ngày đặt hàng" HorizontalAlignment="Left" Margin="224,31,0,0" Grid.Row="1" VerticalAlignment="Top" Width="120" Grid.ColumnSpan="2"/>
+        <Button
+            Grid.Column="1" 
+            x:Name="btUpdateOrderDateAll"
+            Content="Cập nhật tất cả"
+            HorizontalAlignment="Left" 
+            Margin="220,86,0,0" 
+            Grid.Row="1" 
+            VerticalAlignment="Top" 
+            Grid.ColumnSpan="2"
+            ToolTipService.Placement="Right"
+            ToolTipService.HorizontalOffset="10"
+            ToolTipService.VerticalOffset="0"
+            ToolTip="Cập nhật tất cả đơn hàng với ngày được chọn" Click="btUpdateOrderDateAll_Click"/>
     </Grid>
 </Window>
