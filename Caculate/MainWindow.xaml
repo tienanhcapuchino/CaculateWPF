@@ -220,5 +220,15 @@
             ToolTipService.HorizontalOffset="10"
             ToolTipService.VerticalOffset="0"
             ToolTip="Cập nhật tất cả đơn hàng với ngày được chọn" Click="btUpdateOrderDateAll_Click"/>
+        <Label Content="Lọc thành viên" HorizontalAlignment="Left" Margin="10,51,0,0" Grid.Row="2" VerticalAlignment="Top"/>
+        <ComboBox 
+            x:Name="cbFilterMembers"
+            HorizontalAlignment="Left" 
+            Margin="10,88,0,0" 
+            Grid.Row="2" 
+            Width="120" 
+            VerticalAlignment="Top" SelectionChanged="cbFilterMembers_SelectionChanged"/>
+        <Label Content="Lọc theo ngày" HorizontalAlignment="Left" Margin="10,0,0,0" Grid.Row="2" VerticalAlignment="Center"/>
+        <DatePicker x:Name="dtpFilterDate" HorizontalAlignment="Left" Margin="73,164,0,0" Grid.Row="2" VerticalAlignment="Top" RenderTransformOrigin="0.65,0.141" CalendarClosed="dtpFilterDate_CalendarClosed"/>
     </Grid>
 </Window>

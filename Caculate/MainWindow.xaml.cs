@@ -1,11 +1,9 @@
 ﻿using Caculate.DataContext;
 using Caculate.Entities;
-using Caculate.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
-using System.Xml.Linq;
 
 namespace Caculate
 {
@@ -23,6 +21,7 @@ namespace Caculate
             LoadData();
         }
 
+        private List<string> MembersFilter = new List<string>() { "All" };
         private ObservableCollection<DataGridOrderModel> dataGridOrderModels = new ObservableCollection<DataGridOrderModel>();
         private ObservableCollection<DataGridReport> dataGridReports = new ObservableCollection<DataGridReport>();
         private ObservableCollection<DataGridOutstanding> dataGridOutstandings = new ObservableCollection<DataGridOutstanding>();
@@ -46,18 +45,19 @@ namespace Caculate
                 });
             });
 
-            LoadReportByWeek(startOfWeek.Ticks, endOfWeek.Ticks);
+            LoadReportByWeek();
         }
 
 
-        private void LoadReportByWeek(long StartOfWeek, long EndOfWeek)
+        private void LoadReportByWeek(FilterModel? filterModel = null)
         {
             try
             {
+                var (startOfWeek, endOfWeek) = GetCurrentWeek();
                 using (var context = new CaculateDbContext())
                 {
                     var orders = context.Orders
-                        .Where(x => x.CreatedDate >= StartOfWeek && x.CreatedDate <= EndOfWeek)
+                        .Where(x => x.CreatedDate >= startOfWeek.Ticks && x.CreatedDate <= endOfWeek.Ticks)
                         .Include(x => x.Participants)
                         .ThenInclude(x => x.Member)
                         .ToList();
@@ -68,6 +68,16 @@ namespace Caculate
                         x.Member.Name,
                         x.Member.Id
                     }).Distinct().ToList();
+
+                    if (filterModel == null)
+                    {
+                        //load combobox filter members
+                        MembersFilter.AddRange(allMembersJoin.Select(x => x.Name).ToList());
+
+                        cbFilterMembers.ItemsSource = MembersFilter;
+                        cbFilterMembers.SelectedIndex = 0;
+                    }
+
                     foreach (var member in allMembersJoin)
                     {
                         var totalMoneyPaid = orders.Where(x => x.PayerId == member.Id).Sum(x => x.TotalMoney);
@@ -88,6 +98,17 @@ namespace Caculate
                             var orderDetails = order.Participants;
                             if (orderDetails?.Count > 0)
                             {
+                                if (filterModel != null)
+                                {
+                                    if (filterModel.CreatedDate != null)
+                                    {
+                                        orderDetails = orderDetails.Where(x => new DateTime(x.CreatedDate).Date == filterModel.CreatedDate.Value.Date).ToList();
+                                    }
+                                    if (!string.IsNullOrEmpty(filterModel.MemberName) && !filterModel.MemberName.Equals("All"))
+                                    {
+                                        orderDetails = orderDetails.Where(x => x.Member.Name == filterModel.MemberName).ToList();
+                                    }
+                                }
                                 foreach (var orderDetail in orderDetails)
                                 {
                                     var reportDetail = new DataGridReport()
@@ -356,6 +377,36 @@ namespace Caculate
                 MessageBox.Show($"Error when update date order all, {ex.Message}");
                 return;
             }
+        }
+
+        private FilterModel _filterModel;
+
+        private void cbFilterMembers_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var currentMemberFilter = cbFilterMembers.SelectedItem.ToString();
+            var selectedDate = dtpFilterDate.SelectedDate;
+            if (!string.IsNullOrEmpty(currentMemberFilter))
+            {
+                var filterModel = new FilterModel()
+                {
+                    CreatedDate = selectedDate != null ? selectedDate.Value : null,
+                    MemberName = currentMemberFilter
+                };
+                dataGridReports.Clear();
+                LoadReportByWeek(filterModel);
+            }
+        }
+
+        private void dtpFilterDate_CalendarClosed(object sender, RoutedEventArgs e)
+        {
+            var selectedDate = dtpFilterDate.SelectedDate;
+            _filterModel = new FilterModel() 
+            { 
+                CreatedDate = selectedDate != null ? selectedDate.Value : null,
+                MemberName = cbFilterMembers.SelectedItem.ToString()
+            };
+            dataGridReports.Clear();
+            LoadReportByWeek(_filterModel);
         }
     }
 }

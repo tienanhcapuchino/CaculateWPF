@@ -43,4 +43,10 @@ namespace Caculate
         public double Outstanding { get; set; }
     }
 
+    public class FilterModel
+    {
+        public DateTime? CreatedDate { get; set; } = null;
+        public string? MemberName { get; set; } = "";
+    }
+
 }
