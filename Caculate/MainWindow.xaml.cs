@@ -15,23 +15,25 @@ namespace Caculate
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        private readonly IMemberService _memberService;
+        public MainWindow(IMemberService memberService)
         {
             InitializeComponent();
             dtgOrders.ItemsSource = dataGridOrderModels;
             dtgReport.ItemsSource = dataGridReports;
             dtgOutstanding.ItemsSource = dataGridOutstandings;
+            _memberService = memberService;
             LoadData();
         }
 
-        private List<string> MembersFilter = new List<string>() { "All" };
-        private ObservableCollection<DataGridOrderModel> dataGridOrderModels = new ObservableCollection<DataGridOrderModel>();
-        private ObservableCollection<DataGridReport> dataGridReports = new ObservableCollection<DataGridReport>();
-        private ObservableCollection<DataGridOutstanding> dataGridOutstandings = new ObservableCollection<DataGridOutstanding>();
+        private List<string> MembersFilter = ["All"];
+        private ObservableCollection<DataGridOrderModel> dataGridOrderModels = [];
+        private ObservableCollection<DataGridReport> dataGridReports = [];
+        private ObservableCollection<DataGridOutstanding> dataGridOutstandings = [];
 
         private Uri? GetLoadingSpinnerUri()
         {
-            string gifFilePath = Path.Combine(Directory.GetCurrentDirectory(), "Images", "loading_spinner.gif");
+            var gifFilePath = Path.Combine(Directory.GetCurrentDirectory(), "Images", "loading_spinner.gif");
             var gifUri = new Uri(gifFilePath);
             return gifUri;
         }
@@ -44,11 +46,7 @@ namespace Caculate
             //Task.Delay(5000);
             var (startOfWeek, endOfWeek) = GetCurrentWeek();
             tbWeek.Text = $"TUẦN: {startOfWeek:dd/MM/yyyy} - {endOfWeek:dd/MM/yyyy}";
-            List<Member> members = new List<Member>();
-            using (var context = new CaculateDbContext())
-            {
-                members = context.Members.ToList();
-            }
+            var members = _memberService.GetAllMembers().GetAwaiter().GetResult();
 
             members.ForEach(member =>
             {
@@ -264,16 +262,17 @@ namespace Caculate
                     Id = Guid.NewGuid(),
                     Name = tbNewMember.Text.Trim()
                 };
-                using (var context = new CaculateDbContext())
+                var isExistName = _memberService.IsExistName(member.Name).GetAwaiter().GetResult();
+                if (isExistName)
                 {
-                    var isExistName = context.Members.Any(x => x.Name == member.Name);
-                    if (isExistName)
-                    {
-                        MessageBox.Show("Member name is exist");
-                        return;
-                    }
-                    context.Members.Add(member);
-                    context.SaveChanges();
+                    MessageBox.Show("Member name is exist");
+                    return;
+                }
+
+                var resultAdd = _memberService.AddNewMember(member).GetAwaiter().GetResult();
+                if (!resultAdd)
+                {
+                    MessageBox.Show("Add failed");
                 }
                 AddedMemberDialog.IsOpen = false;
                 MessageBox.Show("Add member successfully");
@@ -293,7 +292,6 @@ namespace Caculate
         private void AddNewMember_Click(object sender, RoutedEventArgs e)
         {
             AddedMemberDialog.IsOpen = true;
-
         }
 
         private void EditMember_Click(object sender, RoutedEventArgs e)
@@ -303,27 +301,28 @@ namespace Caculate
                 if (dtgOrders.CommitEdit(DataGridEditingUnit.Row, true) && dtgOrders.CommitEdit())
                 {
                     var button = sender as Button;
-                    var member = button?.DataContext as DataGridOrderModel;
+                    DataGridOrderModel? member = button?.DataContext as DataGridOrderModel;
                     if (member != null)
                     {
-                        using (var context = new CaculateDbContext())
+                        var memberEntity = _memberService.GetMemberById(member.MemberId).GetAwaiter().GetResult();
+                        if (memberEntity != null && !memberEntity.Equals(member.Name.Trim()))
                         {
-                            var memberEntity = context.Members.FirstOrDefault(x => x.Id == member.MemberId);
-                            if (memberEntity != null && !memberEntity.Equals(member.Name.Trim()))
+                            memberEntity.Name = member.Name.Trim();
+                            var result = _memberService.UpdateMember(memberEntity).GetAwaiter().GetResult();
+                            if (!result)
                             {
-                                memberEntity.Name = member.Name.Trim();
-                                context.Update(memberEntity);
-                                context.SaveChanges();
-                                MessageBox.Show($"Updated member: {member.Name}");
-                                btRefresh_Click(sender, e);
+                                MessageBox.Show($"Member: {member.Name} is already existed!");
+                                return;
                             }
+                            MessageBox.Show($"Updated member: {member.Name}");
+                            btRefresh_Click(sender, e);
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error when delete member: {ex.Message}");
+                MessageBox.Show($"Error when edit member: {ex.Message}");
                 return;
             }
         }
@@ -352,15 +351,14 @@ namespace Caculate
         {
             try
             {
-                using (var context = new CaculateDbContext())
+                var resultDelete = _memberService.DeleteMember(memberId).GetAwaiter().GetResult();
+                if (resultDelete)
                 {
-                    var memberEntity = context.Members.FirstOrDefault(x => x.Id == memberId);
-                    if (memberEntity != null)
-                    {
-                        context.Members.Remove(memberEntity);
-                        context.SaveChanges();
-                        MessageBox.Show("Deleted member!");
-                    }
+                    MessageBox.Show("Deleted member!");
+                }
+                else
+                {
+                    MessageBox.Show("Delete failed!");
                 }
             }
             catch (Exception ex)

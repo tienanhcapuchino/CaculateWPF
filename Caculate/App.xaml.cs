@@ -21,26 +21,24 @@ namespace Caculate
         }
         private void ConfigureServices(IServiceCollection services)
         {
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
-                .Build();
-
             services.AddDbContext<CaculateDbContext>(options =>
             {
-                string databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CaculateApp", "caculateapp.db");
+                var databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CaculateApp", "caculateapp.db");
                 Directory.CreateDirectory(Path.GetDirectoryName(databasePath));
                 options.UseSqlite($"Data Source={databasePath}");
             });
+            services.AddSingleton<IMemberService, MemberService>();
+            services.AddScoped<MainWindow>();
         }
-        protected override void OnStartup(StartupEventArgs e)
+        private void OnStartup(object sender, StartupEventArgs e)
         {
-            using (var scope = _serviceProvider.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<CaculateDbContext>();
-                dbContext.Database.EnsureCreated();
-            }
-            base.OnStartup(e);
+            //ensure create database when application start up
+            using var scope = _serviceProvider.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<CaculateDbContext>();
+            dbContext.Database.EnsureCreated();
+            
+            var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
+            mainWindow.Show();
         }
     }
 
