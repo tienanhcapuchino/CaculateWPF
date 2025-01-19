@@ -1,6 +1,6 @@
 ﻿using Caculate.Entities;
 
-namespace Caculate.Services.Interfaces
+namespace Caculate
 {
     public interface IOrderService
     {

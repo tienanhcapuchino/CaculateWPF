@@ -1,7 +1,8 @@
 ﻿using Caculate.DataContext;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using NLog;
+using NLog.Web;
 using System.IO;
 using System.Windows;
 
@@ -28,7 +29,9 @@ namespace Caculate
                 options.UseSqlite($"Data Source={databasePath}");
             });
             services.AddSingleton<IMemberService, MemberService>();
+            services.AddSingleton<IOrderService, OrderService>();
             services.AddScoped<MainWindow>();
+            LogManager.Setup().LoadConfigurationFromAppSettings();
         }
         private void OnStartup(object sender, StartupEventArgs e)
         {

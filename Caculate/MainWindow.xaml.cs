@@ -1,6 +1,7 @@
 ﻿using Caculate.DataContext;
 using Caculate.Entities;
 using Microsoft.EntityFrameworkCore;
+using NLog;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
@@ -16,13 +17,18 @@ namespace Caculate
     public partial class MainWindow : Window
     {
         private readonly IMemberService _memberService;
-        public MainWindow(IMemberService memberService)
+        private readonly IOrderService _orderService;
+        private readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+
+        public MainWindow(IMemberService memberService,
+            IOrderService orderService)
         {
             InitializeComponent();
             dtgOrders.ItemsSource = dataGridOrderModels;
             dtgReport.ItemsSource = dataGridReports;
             dtgOutstanding.ItemsSource = dataGridOutstandings;
             _memberService = memberService;
+            _orderService = orderService;
             LoadData();
         }
 
@@ -185,53 +191,58 @@ namespace Caculate
                     MessageBox.Show("Không có người trả!");
                     return;
                 }
-                using (var context = new CaculateDbContext())
+                var payer = _memberService.GetMemberByName(payerName).GetAwaiter().GetResult();
+                if (payer == null)
                 {
-                    var payer = context.Members.Where(x => x.Name == payerName).Select(x => x.Id).FirstOrDefault();
-                    if (payer == Guid.Empty)
+                    MessageBox.Show("Người trả không tồn tại trong hệ thống!");
+                    return;
+                }
+
+                var order = new Order()
+                {
+                    Id = Guid.NewGuid(),
+                    CreatedDate = DateTime.Now.Ticks,
+                    TotalMoney = totalMoney,
+                    PayerId = payer.Id
+                };
+                var resultAddOrder = _orderService.AddNewOrder(order).GetAwaiter().GetResult();
+                if (!resultAddOrder)
+                {
+                    MessageBox.Show("Đã có lỗi khi lưu đơn hàng!");
+                    return;
+                }
+
+                List<OrderParticipant> orderParticipants = [];
+                foreach (var item in dataGridOrderModels)
+                {
+                    var member = _memberService.GetMemberById(item.MemberId).GetAwaiter().GetResult();
+                    if (member == null)
                     {
-                        MessageBox.Show("Người trả không tồn tại trong hệ thống!");
+                        MessageBox.Show($"Thành viên: {item.Name} không tồn tại trong hệ thống! Hãy thêm thành viên trước!");
                         return;
                     }
-
-                    var order = new Order()
+                    var orderParticipant = new OrderParticipant()
                     {
                         Id = Guid.NewGuid(),
-                        CreatedDate = DateTime.Now.Ticks,
-                        TotalMoney = totalMoney,
-                        PayerId = payer
+                        MemberId = member.Id,
+                        Money = item.Money,
+                        CreatedDate = item.CreatedDate.Ticks,
+                        OrderId = order.Id
                     };
-                    context.Orders.Add(order);
-                    context.SaveChanges();
-
-                    List<OrderParticipant> orderParticipants = new List<OrderParticipant>();
-                    foreach (var item in dataGridOrderModels)
-                    {
-                        var memberId = context.Members.Where(x => x.Name == item.Name.Trim()).Select(x => x.Id).FirstOrDefault();
-                        if (memberId == Guid.Empty)
-                        {
-                            MessageBox.Show($"Thành viên: {item.Name} không tồn tại trong hệ thống! Hãy thêm thành viên trước!");
-                            return;
-                        }
-                        var orderParticipant = new OrderParticipant()
-                        {
-                            Id = Guid.NewGuid(),
-                            MemberId = memberId,
-                            Money = item.Money,
-                            CreatedDate = item.CreatedDate.Ticks,
-                            OrderId = order.Id
-                        };
-                        orderParticipants.Add(orderParticipant);
-                    }
-                    if (orderParticipants.Count > 0)
-                    {
-                        context.OrderParticipants.AddRange(orderParticipants);
-                        context.SaveChanges();
-                    }
-                    MessageBox.Show("Lưu đơn hàng thành công!");
-                    dataGridOrderModels.Clear();
-                    btRefresh_Click(sender, e);
+                    orderParticipants.Add(orderParticipant);
                 }
+                if (orderParticipants.Count > 0)
+                {
+                    var resultAdd = _orderService.AddOrderParticipants(orderParticipants).GetAwaiter().GetResult();
+                    if (!resultAdd)
+                    {
+                        MessageBox.Show("Đã có lỗi khi lưu thông tin đơn hàng!");
+                        return;
+                    }
+                }
+                MessageBox.Show("Lưu đơn hàng thành công!");
+                dataGridOrderModels.Clear();
+                btRefresh_Click(sender, e);
             }
             catch (Exception ex)
             {
