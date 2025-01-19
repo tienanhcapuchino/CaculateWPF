@@ -159,20 +159,20 @@ namespace Caculate
             //validate
             if (dataGridOrderModels.Count == 0)
             {
-                MessageBox.Show("Please add order detail first");
+                MessageBox.Show("Hãy thêm thông tin đơn hàng trước!");
                 return;
             }
             var countIsPayer = dataGridOrderModels.Count(x => x.IsPayer);
 
             if (countIsPayer > 1)
             {
-                MessageBox.Show("You only can select one payer!");
+                MessageBox.Show("Bạn chỉ có thể chọn một người trả!");
                 return;
             }
 
             if (countIsPayer == 0)
             {
-                MessageBox.Show("Please select payer");
+                MessageBox.Show("Hãy chọn người trả!");
                 return;
             }
 
@@ -182,7 +182,7 @@ namespace Caculate
                 var payerName = dataGridOrderModels.FirstOrDefault(x => x.IsPayer)?.Name?.Trim();
                 if (string.IsNullOrEmpty(payerName))
                 {
-                    MessageBox.Show("Don't have payer!");
+                    MessageBox.Show("Không có người trả!");
                     return;
                 }
                 using (var context = new CaculateDbContext())
@@ -190,7 +190,7 @@ namespace Caculate
                     var payer = context.Members.Where(x => x.Name == payerName).Select(x => x.Id).FirstOrDefault();
                     if (payer == Guid.Empty)
                     {
-                        MessageBox.Show("Payer is not exist");
+                        MessageBox.Show("Người trả không tồn tại trong hệ thống!");
                         return;
                     }
 
@@ -210,7 +210,7 @@ namespace Caculate
                         var memberId = context.Members.Where(x => x.Name == item.Name.Trim()).Select(x => x.Id).FirstOrDefault();
                         if (memberId == Guid.Empty)
                         {
-                            MessageBox.Show($"Member {item.Name} is not exist");
+                            MessageBox.Show($"Thành viên: {item.Name} không tồn tại trong hệ thống! Hãy thêm thành viên trước!");
                             return;
                         }
                         var orderParticipant = new OrderParticipant()
@@ -228,7 +228,7 @@ namespace Caculate
                         context.OrderParticipants.AddRange(orderParticipants);
                         context.SaveChanges();
                     }
-                    MessageBox.Show("Submit order successfully");
+                    MessageBox.Show("Lưu đơn hàng thành công!");
                     dataGridOrderModels.Clear();
                     btRefresh_Click(sender, e);
                 }
@@ -252,7 +252,7 @@ namespace Caculate
         {
             if (string.IsNullOrEmpty(tbNewMember.Text))
             {
-                MessageBox.Show("Please enter member name");
+                MessageBox.Show("Hãy nhập tên thành viên!");
                 return;
             }
             try
@@ -265,17 +265,17 @@ namespace Caculate
                 var isExistName = _memberService.IsExistName(member.Name).GetAwaiter().GetResult();
                 if (isExistName)
                 {
-                    MessageBox.Show("Member name is exist");
+                    MessageBox.Show("Thành viên đã tồn tại trong hệ thống!");
                     return;
                 }
 
                 var resultAdd = _memberService.AddNewMember(member).GetAwaiter().GetResult();
                 if (!resultAdd)
                 {
-                    MessageBox.Show("Add failed");
+                    MessageBox.Show("Đã có lỗi khi thêm!");
                 }
                 AddedMemberDialog.IsOpen = false;
-                MessageBox.Show("Add member successfully");
+                MessageBox.Show("Thêm thành viên thành công!");
                 btRefresh_Click(sender, e);
             }
             catch (Exception ex)
@@ -311,10 +311,10 @@ namespace Caculate
                             var result = _memberService.UpdateMember(memberEntity).GetAwaiter().GetResult();
                             if (!result)
                             {
-                                MessageBox.Show($"Member: {member.Name} is already existed!");
+                                MessageBox.Show($"Thành viên: {member.Name} đã tồn tại trong hệ thống!");
                                 return;
                             }
-                            MessageBox.Show($"Updated member: {member.Name}");
+                            MessageBox.Show($"Cập nhật thành viên: {member.Name} thành công!");
                             btRefresh_Click(sender, e);
                         }
                     }
@@ -354,11 +354,11 @@ namespace Caculate
                 var resultDelete = _memberService.DeleteMember(memberId).GetAwaiter().GetResult();
                 if (resultDelete)
                 {
-                    MessageBox.Show("Deleted member!");
+                    MessageBox.Show("Đã xóa thành viên!");
                 }
                 else
                 {
-                    MessageBox.Show("Delete failed!");
+                    MessageBox.Show("Đã có lỗi khi xóa thành viên!");
                 }
             }
             catch (Exception ex)
@@ -375,7 +375,7 @@ namespace Caculate
                 var selectedOrderDate = dtpOrderDateCustom.SelectedDate;
                 if (!selectedOrderDate.HasValue)
                 {
-                    MessageBox.Show("Please select date first");
+                    MessageBox.Show("Hãy chọn ngày trước!");
                     return;
                 }
 
