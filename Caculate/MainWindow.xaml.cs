@@ -145,7 +145,9 @@ namespace Caculate
             }
             catch (Exception ex)
             {
+                _logger.Error(ex, $"Error when LoadReportByWeek,{ex.Message}");
                 MessageBox.Show($"Error: {ex.Message}");
+                return;
             }
         }
 
@@ -246,7 +248,9 @@ namespace Caculate
             }
             catch (Exception ex)
             {
+                _logger.Error(ex, $"Error when tbSubmitOrder_Click, {ex.Message}");
                 MessageBox.Show($"Error: {ex.Message}");
+                return;
             }
         }
 
@@ -291,7 +295,9 @@ namespace Caculate
             }
             catch (Exception ex)
             {
+                _logger.Error(ex, $"Error when SubmitNameDialogButton_Click, {ex.Message}");
                 MessageBox.Show($"Error: {ex.Message}");
+                return;
             }
         }
 
@@ -333,6 +339,7 @@ namespace Caculate
             }
             catch (Exception ex)
             {
+                _logger.Error(ex, $"Error when EditMember_Click, {ex.Message}");
                 MessageBox.Show($"Error when edit member: {ex.Message}");
                 return;
             }
@@ -353,6 +360,7 @@ namespace Caculate
             }
             catch (Exception ex)
             {
+                _logger.Error(ex, $"Error when DeleteMember_Click, {ex.Message}");
                 MessageBox.Show($"Error when delete member: {ex.Message}");
                 return;
             }
@@ -374,6 +382,7 @@ namespace Caculate
             }
             catch (Exception ex)
             {
+                _logger.Error(ex, $"Error when DeleteMemberAsync, {ex.Message}");
                 MessageBox.Show($"Error when delete member: {ex.Message}");
                 return;
             }
@@ -394,10 +403,10 @@ namespace Caculate
                 {
                     item.CreatedDate = selectedOrderDate.Value;
                 }
-
             }
             catch (Exception ex)
             {
+                _logger.Error(ex, $"Error when btUpdateOrderDateAll_Click, {ex.Message}");
                 MessageBox.Show($"Error when update date order all, {ex.Message}");
                 return;
             }
@@ -407,28 +416,46 @@ namespace Caculate
 
         private void cbFilterMembers_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var currentMemberFilter = cbFilterMembers.SelectedItem.ToString();
-            var selectedDate = dtpFilterDate.SelectedDate;
-            if (!string.IsNullOrEmpty(currentMemberFilter))
+            try
             {
-                var filterModel = new FilterModel()
+                var currentMemberFilter = cbFilterMembers.SelectedItem.ToString();
+                var selectedDate = dtpFilterDate.SelectedDate;
+                if (!string.IsNullOrEmpty(currentMemberFilter))
                 {
-                    CreatedDate = selectedDate != null ? selectedDate.Value : null,
-                    MemberName = currentMemberFilter
-                };
-                LoadReportByWeek(filterModel);
+                    var filterModel = new FilterModel()
+                    {
+                        CreatedDate = selectedDate != null ? selectedDate.Value : null,
+                        MemberName = currentMemberFilter
+                    };
+                    LoadReportByWeek(filterModel);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, $"Error when cbFilterMembers_SelectionChanged, {ex.Message}");
+                MessageBox.Show($"Error when select members filter, {ex.Message}");
+                return;
             }
         }
 
         private void dtpFilterDate_CalendarClosed(object sender, RoutedEventArgs e)
         {
-            var selectedDate = dtpFilterDate.SelectedDate;
-            _filterModel = new FilterModel()
+            try
             {
-                CreatedDate = selectedDate != null ? selectedDate.Value : null,
-                MemberName = cbFilterMembers.SelectedItem.ToString()
-            };
-            LoadReportByWeek(_filterModel);
+                var selectedDate = dtpFilterDate.SelectedDate;
+                _filterModel = new FilterModel()
+                {
+                    CreatedDate = selectedDate != null ? selectedDate.Value : null,
+                    MemberName = cbFilterMembers.SelectedItem.ToString()
+                };
+                LoadReportByWeek(_filterModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, $"Error when dtpFilterDate_CalendarClosed, {ex.Message}");
+                MessageBox.Show($"Error when select date filter, {ex.Message}");
+                return;
+            }
         }
     }
 }
