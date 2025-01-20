@@ -25,10 +25,6 @@ namespace Caculate
             InitializeComponent();
             _memberService = memberService;
             _orderService = orderService;
-            LoadData();
-            dtgOrders.ItemsSource = dataGridOrderModels;
-            dtgReport.ItemsSource = dataGridReports;
-            dtgOutstanding.ItemsSource = dataGridOutstandings;
         }
 
         private List<string> MembersFilter = ["All"];
@@ -64,6 +60,9 @@ namespace Caculate
 
             LoadReportByWeek();
             //loadingSpinnerGift.Visibility = Visibility.Collapsed;
+            dtgOrders.ItemsSource = dataGridOrderModels;
+            dtgReport.ItemsSource = dataGridReports;
+            dtgOutstanding.ItemsSource = dataGridOutstandings;
         }
 
 
@@ -81,11 +80,9 @@ namespace Caculate
                 }
                 dataGridOutstandings.Clear();
                 dataGridOutstandings = outstandings;
-                dtgOutstanding.ItemsSource = dataGridOutstandings;
 
                 dataGridReports.Clear();
                 dataGridReports = reports;
-                dtgReport.ItemsSource = dataGridReports;
             }
             catch (Exception ex)
             {
@@ -401,6 +398,11 @@ namespace Caculate
                 MessageBox.Show($"Error when select date filter, {ex.Message}");
                 return;
             }
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            LoadData();
         }
     }
 }
