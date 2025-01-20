@@ -210,7 +210,7 @@
         <materialDesign:Card FontWeight="Bold" FontSize="18" Content="Lịch sử theo tuần" HorizontalAlignment="Left" Margin="40,15,0,0" VerticalAlignment="Top" Height="28" Width="153" Grid.Row="2"/>
         <materialDesign:Card FontWeight="Bold" FontSize="18" Content="Thông tin dư nợ trong tuần" HorizontalAlignment="Center" Margin="0,123,0,0" VerticalAlignment="Top" Height="25" Width="219" Grid.Column="2" Grid.Row="1"/>
         <DatePicker Grid.Column="1" x:Name="dtpOrderDateCustom" HorizontalAlignment="Left" Margin="224,49,0,0" Grid.Row="1" VerticalAlignment="Top" RenderTransformOrigin="-5.414,1.562" Height="32" Width="120" Grid.ColumnSpan="2"/>
-        <Label Grid.Column="1" FontWeight="Bold" Content="Chọn ngày đặt hàng" HorizontalAlignment="Left" Margin="224,31,0,0" Grid.Row="1" VerticalAlignment="Top" Width="120" Grid.ColumnSpan="2"/>
+        <Label Grid.Column="1" FontWeight="Bold" Content="Chọn ngày đặt hàng" HorizontalAlignment="Left" Margin="224,31,0,0" Grid.Row="1" VerticalAlignment="Top" Width="130" Grid.ColumnSpan="2"/>
         <Button
             Grid.Column="1" 
             x:Name="btUpdateOrderDateAll"
@@ -237,7 +237,7 @@
         <Image x:Name="loadingSpinnerGift"
                HorizontalAlignment="Left"
                VerticalAlignment="Top"
-               Visibility="Collapsed"
-               Width="167" Height="129" Margin="396,168,0,0" Grid.Row="1" Grid.ColumnSpan="2" Grid.RowSpan="2" />
+               Visibility="Visible"
+               Width="167" Height="129" Margin="171,210,0,0" Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" Grid.ColumnSpan="2" />
     </Grid>
 </Window>

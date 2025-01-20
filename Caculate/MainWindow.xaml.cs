@@ -43,8 +43,6 @@ namespace Caculate
         {
             var giftUri = GetLoadingSpinnerUri();
             ImageBehavior.SetAnimatedSource(loadingSpinnerGift, new BitmapImage(giftUri));
-            loadingSpinnerGift.Visibility = Visibility.Visible;
-            //Task.Delay(5000);
             var (startOfWeek, endOfWeek) = GetCurrentWeek();
             tbWeek.Text = $"TUẦN: {startOfWeek:dd/MM/yyyy} - {endOfWeek:dd/MM/yyyy}";
             var members = _memberService.GetAllMembers().GetAwaiter().GetResult();
@@ -59,7 +57,6 @@ namespace Caculate
             });
 
             LoadReportByWeek();
-            //loadingSpinnerGift.Visibility = Visibility.Collapsed;
             dtgOrders.ItemsSource = dataGridOrderModels;
             dtgReport.ItemsSource = dataGridReports;
             dtgOutstanding.ItemsSource = dataGridOutstandings;
