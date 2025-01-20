@@ -54,24 +54,26 @@ namespace Caculate
                 var reports = new ObservableCollection<DataGridReport>();
 
 
-                // Fetch orders and related data asynchronously
+                //Fetch orders and related data
                 var orders = await _dbContext.Orders
                     .Where(x => x.CreatedDate >= startOfWeek.Ticks && x.CreatedDate <= endOfWeek.Ticks)
+                    .OrderByDescending(x => x.CreatedDate)
                     .Include(x => x.Participants)
                     .ThenInclude(x => x.Member)
                     .ToListAsync();
 
-                // Calculate outstanding
+                //Calculate outstanding
                 var allMembersJoin = orders
                     .SelectMany(x => x.Participants)
                     .Select(x => new { x.Member.Name, x.Member.Id })
                     .Distinct()
+                    .OrderBy(x => x.Name)
                     .ToList();
 
-                // Populate filter member names
+                //Populate filter member names
                 var memberNames = allMembersJoin.Select(x => x.Name).ToList();
 
-                // Compute outstanding for each member
+                //Compute outstanding for each member
                 foreach (var member in allMembersJoin)
                 {
                     var totalMoneyPaid = orders.Where(x => x.PayerId == member.Id).Sum(x => x.TotalMoney);
@@ -84,10 +86,11 @@ namespace Caculate
                     });
                 }
 
-                // Generate weekly report
+                //Generate weekly report
                 foreach (var order in orders)
                 {
-                    var orderDetails = order.Participants;
+                    var orderDetails = order.Participants.ToList();
+                    orderDetails = orderDetails.OrderBy(x => x.Member.Name).ThenBy(x => x.Money).ToList();
 
                     if (filterModel != null)
                     {
@@ -113,7 +116,7 @@ namespace Caculate
                         };
                         reports.Add(dataGridReport);
                     }
-
+                    
                 }
 
                 return (memberNames, outstandings, reports);
@@ -121,7 +124,7 @@ namespace Caculate
             catch (Exception ex)
             {
                 _logger.Error(ex, $"Error when LoadReportByWeek, {ex.Message}");
-                throw; // Re-throw exception to let the caller handle it
+                throw;
             }
         }
 

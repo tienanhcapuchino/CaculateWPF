@@ -27,7 +27,7 @@ namespace Caculate
             _orderService = orderService;
         }
 
-        private List<string> MembersFilter = ["All"];
+        private List<string> MembersFilter;
         private ObservableCollection<DataGridOrderModel> dataGridOrderModels = [];
         private ObservableCollection<DataGridReport> dataGridReports = [];
         private ObservableCollection<DataGridOutstanding> dataGridOutstandings = [];
@@ -58,8 +58,6 @@ namespace Caculate
 
             LoadReportByWeek();
             dtgOrders.ItemsSource = dataGridOrderModels;
-            dtgReport.ItemsSource = dataGridReports;
-            dtgOutstanding.ItemsSource = dataGridOutstandings;
         }
 
 
@@ -71,15 +69,18 @@ namespace Caculate
                 var (memberNames, outstandings, reports) = _orderService.GetReportByWeekAsync(startOfWeek, endOfWeek, filterModel).GetAwaiter().GetResult();
                 if (filterModel == null)
                 {
-                    MembersFilter.Clear();
+                    MembersFilter = ["All"];
                     MembersFilter.AddRange(memberNames);
                     cbFilterMembers.ItemsSource = MembersFilter;
+                    cbFilterMembers.SelectedIndex = 0;
                 }
                 dataGridOutstandings.Clear();
                 dataGridOutstandings = outstandings;
+                dtgOutstanding.ItemsSource = dataGridOutstandings;
 
                 dataGridReports.Clear();
                 dataGridReports = reports;
+                dtgReport.ItemsSource = dataGridReports;
             }
             catch (Exception ex)
             {
