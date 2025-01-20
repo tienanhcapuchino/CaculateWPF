@@ -1,5 +1,4 @@
-﻿using Caculate.DataContext;
-using Caculate.Entities;
+﻿using Caculate.Entities;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 using System.Collections.ObjectModel;
@@ -24,12 +23,12 @@ namespace Caculate
             IOrderService orderService)
         {
             InitializeComponent();
-            dtgOrders.ItemsSource = dataGridOrderModels;
-            dtgReport.ItemsSource = dataGridReports;
-            dtgOutstanding.ItemsSource = dataGridOutstandings;
             _memberService = memberService;
             _orderService = orderService;
             LoadData();
+            dtgOrders.ItemsSource = dataGridOrderModels;
+            dtgReport.ItemsSource = dataGridReports;
+            dtgOutstanding.ItemsSource = dataGridOutstandings;
         }
 
         private List<string> MembersFilter = ["All"];
@@ -72,76 +71,21 @@ namespace Caculate
         {
             try
             {
-                dataGridReports.Clear();
-                dataGridOutstandings.Clear();
                 var (startOfWeek, endOfWeek) = GetCurrentWeek();
-                using (var context = new CaculateDbContext())
+                var (memberNames, outstandings, reports) = _orderService.GetReportByWeekAsync(startOfWeek, endOfWeek, filterModel).GetAwaiter().GetResult();
+                if (filterModel == null)
                 {
-                    var orders = context.Orders
-                        .Where(x => x.CreatedDate >= startOfWeek.Ticks && x.CreatedDate <= endOfWeek.Ticks)
-                        .Include(x => x.Participants)
-                        .ThenInclude(x => x.Member)
-                        .ToList();
-
-                    //caculate outstanding
-                    var allMembersJoin = orders.SelectMany(x => x.Participants).Select(x => new
-                    {
-                        x.Member.Name,
-                        x.Member.Id
-                    }).Distinct().ToList();
-
-                    if (filterModel == null)
-                    {
-                        //load combobox filter members
-                        MembersFilter.AddRange(allMembersJoin.Select(x => x.Name).ToList());
-                        cbFilterMembers.ItemsSource = MembersFilter;
-                    }
-
-                    foreach (var member in allMembersJoin)
-                    {
-                        var totalMoneyPaid = orders.Where(x => x.PayerId == member.Id).Sum(x => x.TotalMoney);
-                        var totalUsed = orders.SelectMany(x => x.Participants).Where(x => x.MemberId == member.Id).Sum(x => x.Money);
-                        var outstanding = new DataGridOutstanding()
-                        {
-                            Name = member.Name,
-                            Outstanding = totalMoneyPaid - totalUsed
-                        };
-                        dataGridOutstandings.Add(outstanding);
-                    }
-
-                    //weekly report
-                    if (orders?.Count > 0)
-                    {
-                        foreach (var order in orders)
-                        {
-                            var orderDetails = order.Participants;
-                            if (orderDetails?.Count > 0)
-                            {
-                                if (filterModel != null)
-                                {
-                                    if (filterModel.CreatedDate != null)
-                                    {
-                                        orderDetails = orderDetails.Where(x => new DateTime(x.CreatedDate).Date == filterModel.CreatedDate.Value.Date).ToList();
-                                    }
-                                    if (!string.IsNullOrEmpty(filterModel.MemberName) && !filterModel.MemberName.Equals("All"))
-                                    {
-                                        orderDetails = orderDetails.Where(x => x.Member.Name == filterModel.MemberName).ToList();
-                                    }
-                                }
-                                foreach (var orderDetail in orderDetails)
-                                {
-                                    var reportDetail = new DataGridReport()
-                                    {
-                                        CreatedDate = (new DateTime(orderDetail.CreatedDate)).ToString("dd/MM/yyyy"),
-                                        Name = orderDetail.Member.Name,
-                                        Money = orderDetail.Money
-                                    };
-                                    dataGridReports.Add(reportDetail);
-                                }
-                            }
-                        }
-                    }
+                    MembersFilter.Clear();
+                    MembersFilter.AddRange(memberNames);
+                    cbFilterMembers.ItemsSource = MembersFilter;
                 }
+                dataGridOutstandings.Clear();
+                dataGridOutstandings = outstandings;
+                dtgOutstanding.ItemsSource = dataGridOutstandings;
+
+                dataGridReports.Clear();
+                dataGridReports = reports;
+                dtgReport.ItemsSource = dataGridReports;
             }
             catch (Exception ex)
             {
@@ -291,6 +235,7 @@ namespace Caculate
                 }
                 AddedMemberDialog.IsOpen = false;
                 MessageBox.Show("Thêm thành viên thành công!");
+                tbNewMember.Text = "";
                 btRefresh_Click(sender, e);
             }
             catch (Exception ex)

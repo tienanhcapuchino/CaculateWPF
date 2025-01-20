@@ -11,10 +11,6 @@ namespace Caculate.DataContext
         {
         }
 
-        public CaculateDbContext()
-        {
-        }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new MemberConfiguration());
