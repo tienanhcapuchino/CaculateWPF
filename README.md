@@ -9,6 +9,7 @@ Caculate App is written by C# with WPF App template. It is used to store the ord
 - WPF App C#
 - SQLite
 - MaterialDesign for UI
+- .NET 8
 
 3. Documentation for using
 
